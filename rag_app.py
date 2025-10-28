@@ -1,10 +1,17 @@
 """
 Simple RAG smoke-test script.
-- Loads ./data/RAG_source.txt (expects .txt)
-- Splits with chunk_size=1000, chunk_overlap=0
-- Embeds with OpenAI embeddings model (env OPENAI_EMBEDDING_MODEL)
-- Indexes into Chroma at ./chroma_db
-- Retrieves top-k (k=4) and attempts to generate an answer using chat model (env OPENAI_CHAT_MODEL)
+
+Behavior summary:
+- Loads `./data/RAG_source.txt` (expects a plain .txt file)
+- Splits with chunk_size=1000, chunk_overlap=0 (defaults; overridable via env)
+- Embeds with OpenAI-compatible embeddings (model from env `OPENAI_EMBEDDING_MODEL`)
+- Indexes into a local Chroma DB at `./chroma_db` (persist dir overridable via env)
+- Retrieves top-k (default k=4) and calls a chat model (env `OPENAI_CHAT_MODEL`) to produce an answer
+
+Environment notes (used by this script):
+- `OPENAI_API_KEY` (or fallback `API_KEY`) — must hold the raw token (sk-...), NOT the literal prefix `Bearer `
+- `OPENAI_BASE_URL` / `OPENAI_API_BASE` — set to your proxy base URL (e.g. `https://api.ai.it.cornell.edu`)
+- `OPENAI_EMBEDDING_MODEL`, `OPENAI_CHAT_MODEL` — optional overrides; defaults are reasonable for grading
 
 Run: python3 rag_app.py
 """
@@ -27,6 +34,14 @@ PERSIST_DIR = os.environ.get('RAG_PERSIST_DIR', './chroma_db')
 EMBEDDING_MODEL = os.environ.get('OPENAI_EMBEDDING_MODEL', 'openai.text-embedding-3-small')
 CHAT_MODEL = os.environ.get('OPENAI_CHAT_MODEL', 'openai.gpt-5-mini')
 
+# Ensure OPENAI_API_KEY is present (fall back to API_KEY if provided by Codespace template)
+if not os.environ.get('OPENAI_API_KEY') and os.environ.get('API_KEY'):
+    os.environ['OPENAI_API_KEY'] = os.environ['API_KEY']
+    print('Using API_KEY as OPENAI_API_KEY fallback')
+
+# Optionally set OPENAI_API_BASE/OPENAI_BASE_URL compatibility
+if not os.environ.get('OPENAI_API_BASE') and os.environ.get('OPENAI_BASE_URL'):
+    os.environ['OPENAI_API_BASE'] = os.environ['OPENAI_BASE_URL']
 print(f'Config: chunk_size={CHUNK_SIZE}, chunk_overlap={CHUNK_OVERLAP}, k={K}')
 print(f'Embedding model: {EMBEDDING_MODEL}, Chat model: {CHAT_MODEL}')
 
@@ -79,7 +94,8 @@ print(f'Retrieved {len(docs_found)} docs — printing snippets:')
 for i,d in enumerate(docs_found, start=1):
     snippet = d.page_content[:400].replace('\n',' ')
     src = d.metadata.get('source', '(no source)') if hasattr(d, 'metadata') else '(no metadata)'
-    print(f'[{i}] source={src} snippet="{snippet[:200]}{'...' if len(snippet)>200 else ''}"')
+    snippet_preview = snippet[:200] + ('...' if len(snippet) > 200 else '')
+    print(f"[{i}] source={src} snippet=\"{snippet_preview}\"")
 
 # attempt to call chat model with context
 print('\nAttempting to call chat model to answer using retrieved context...')
