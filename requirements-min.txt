@@ -11,4 +11,5 @@ tiktoken==0.7.0
 
 # Optional but commonly needed
 pandas
+pypdf>=4
 ```

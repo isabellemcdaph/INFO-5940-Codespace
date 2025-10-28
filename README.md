@@ -50,6 +50,13 @@ Files to look at
 - `rag_app.py` — a minimal end-to-end smoke-test: ingest -> chunk -> embed -> Chroma persist -> retrieve -> chat
 - `langgraph_chroma_retreiver.ipynb` — exploratory notebook (optional)
 
+Data folder and accepted file types
+- Place all source files you want to ingest under the `./data/` directory.
+- Supported file extensions: `.txt` and `.pdf`.
+- The CLI smoke-test `rag_app.py` will load every supported file in `./data/`, create chunks, build/persist a Chroma index at `./chroma_db`, and then run a test retrieval + chat answer.
+
+If you need to ingest other formats later (docx, html), I can add those with minimal changes.
+
 Notes and gotchas
 - Make sure your API key value is the raw token (sk-...), not prefixed with the literal string `Bearer `.
 - Start Streamlit from the same shell/session that has the env vars exported; processes inherit env vars at launch.

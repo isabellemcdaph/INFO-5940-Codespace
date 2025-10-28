@@ -21,9 +21,9 @@ from pathlib import Path
 
 print('Starting RAG smoke test...')
 
-DATA_PATH = Path('./data/RAG_source.txt')
-if not DATA_PATH.exists():
-    print('Error: expected data file at ./data/RAG_source.txt')
+DATA_DIR = Path('./data')
+if not DATA_DIR.exists() or not any(DATA_DIR.iterdir()):
+    print('Error: expected one or more source files in ./data (supported: .txt, .pdf)')
     sys.exit(1)
 
 # sensible defaults and env overrides
@@ -58,11 +58,61 @@ except Exception as e:
     print('Make sure required packages are installed (see requirements.txt).')
     raise
 
-# load
-loader = TextLoader(str(DATA_PATH))
-docs = loader.load()
-print(f'Loaded {len(docs)} source documents (first 200 chars):')
-print(docs[0].page_content[:200].replace('\n',' ') + ('...' if len(docs[0].page_content)>200 else ''))
+# load all supported files from ./data (txt and pdf). We try to use langchain loaders when
+# available and fall back to lightweight readers if not.
+docs = []
+
+# Document class fallback (try langchain_core, then langchain.schema, else simple container)
+try:
+    from langchain_core.documents import Document
+except Exception:
+    try:
+        from langchain.schema import Document
+    except Exception:
+        class Document:
+            def __init__(self, page_content, metadata=None):
+                self.page_content = page_content
+                self.metadata = metadata or {}
+
+for path in sorted(DATA_DIR.iterdir()):
+    if path.suffix.lower() == '.txt':
+        try:
+            loader = TextLoader(str(path))
+            file_docs = loader.load()
+        except Exception:
+            # fallback: simple read
+            text = path.read_text(encoding='utf-8', errors='ignore')
+            file_docs = [Document(page_content=text, metadata={'source': str(path)})]
+    elif path.suffix.lower() == '.pdf':
+        # prefer langchain's PyPDFLoader if available
+        try:
+            from langchain.document_loaders import PyPDFLoader
+            loader = PyPDFLoader(str(path))
+            file_docs = loader.load()
+        except Exception:
+            # fallback to pypdf extraction
+            try:
+                from pypdf import PdfReader
+                reader = PdfReader(str(path))
+                text = '\n\n'.join((page.extract_text() or '') for page in reader.pages)
+                file_docs = [Document(page_content=text, metadata={'source': str(path)})]
+            except Exception as e:
+                print(f'Warning: failed to load PDF {path}: {e}')
+                file_docs = []
+    else:
+        # skip unsupported types
+        print(f'Skipping unsupported file type: {path.name}')
+        file_docs = []
+
+    docs.extend(file_docs)
+
+if not docs:
+    print('No documents were loaded from ./data — aborting.')
+    sys.exit(1)
+
+print(f'Loaded {len(docs)} source documents (showing first source):')
+first = docs[0]
+print(first.page_content[:200].replace('\n',' ') + ('...' if len(first.page_content) > 200 else ''))
 
 # split
 splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
