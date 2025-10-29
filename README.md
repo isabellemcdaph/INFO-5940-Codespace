@@ -1,6 +1,4 @@
-```markdown
 # Background
-This repository contains a small Streamlit RAG demo and a CLI smoke-test (`rag_app.py`) that uses a Codespace-friendly OpenAI proxy.
 
 Once run in browser, you can upload documents in either .txt or .pdf and ask the chatbot to answer questions about your files.
 
@@ -19,7 +17,16 @@ Requirements (what the runner must provide):
 
 # Quick steps 
 
-1) Install python deps (run once in the Codespace terminal):
+1) Install python deps (run once in the Codespace terminal, it may ask you to upgrade pip if you haven't recently):
+
+Note: I recommend creating and activating a virtual environment before installing to ensure tools like `streamlit` are placed on the active PATH and to avoid user-site installs. Example:
+
+```bash
+python3 -m venv .venv-grader
+source .venv-grader/bin/activate
+```
+
+Then install dependencies:
 
 ```bash
 python3 -m pip install -r requirements-min.txt
@@ -52,6 +59,25 @@ Quick smoke-test (CLI) — use this to validate the proxy and embedding/chat end
 ```bash
 python3 rag_app.py            # creates ./chroma_db/, runs a small retrieval and prints a model answer
 ```
+
+## Set the notebook kernel (Codespaces / VS Code)
+
+1. Open the notebook file in VS Code — e.g. `langgraph_chroma_retreiver.merged.ipynb` 
+2. In the top-right of the notebook editor, click `Select Kernel`.
+	- If VS Code suggests "Install/Enable extensions Python + Jupyter", accept and wait for the install to finish.
+3. Choose `Python Environments` and select the interpreter matching the project (pick the Python 3.11.13 environment if available, or the project's virtualenv such as `.venv-grader/bin/python`).
+	- If you followed the README and created a virtualenv (example `.venv-grader`), ensure that virtualenv's interpreter appears in the list and select it.
+4. After switching kernels, run a small cell to confirm imports work, for example:
+
+```python
+import sys
+print(sys.executable)
+```
+
+Notes:
+- If you prefer reproducible environments, use the repo devcontainer (open in Codespaces) which will pick the correct Python automatically.
+- If the kernel is missing from the list, activate the virtualenv in a terminal inside VS Code and re-open the notebook or restart VS Code so the interpreter is discovered.
+
 
 
 # What changed from the assignment template:
