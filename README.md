@@ -1,15 +1,22 @@
 ```markdown
-# INFO 5940 — quick run guide
+# Background
 This repository contains a small Streamlit RAG demo and a CLI smoke-test (`rag_app.py`) that uses a Codespace-friendly OpenAI proxy.
 
-Goal: make it trivial for an instructor or grader to run the assignment with the least terminal typing possible.
+Once run in browser, you can upload documents in either .txt or .pdf and ask the chatbot to answer questions about your files.
+
+Overview — what this project does
+
+- Streamlit UI (`chat_with_pdf.py`): upload one or more text/PDF files and ask questions. The app extracts text, optionally builds a small Chroma vector index, retrieves top-k context, and calls a chat model to answer.
+- CLI smoke-test (`rag_app.py`): run a minimal ingest → chunk → embed → Chroma persist → retrieve → chat flow from the terminal for quick grading.
+- Data-driven: place `.txt` or `.pdf` files into `./data/` for CLI ingestion.
 
 Requirements (what the runner must provide):
 - A GitHub Codespace (or local machine) with Python 3.11 and pip installed.
 - An API key for the institution proxy (do NOT commit your key).
 - The proxy base URL used for OpenAI-compatible requests (for this repo we used `https://api.ai.it.cornell.edu`).
 
-Quick steps — full copy/paste friendly
+
+# Quick steps 
 
 1) Install python deps (run once in the Codespace terminal):
 
@@ -45,27 +52,24 @@ Quick smoke-test (CLI) — use this to validate the proxy and embedding/chat end
 python3 rag_app.py            # creates ./chroma_db/, runs a small retrieval and prints a model answer
 ```
 
-Files to look at
-- `chat_with_pdf.py` — the Streamlit app UI (entrypoint used for the assignment)
-- `rag_app.py` — a minimal end-to-end smoke-test: ingest -> chunk -> embed -> Chroma persist -> retrieve -> chat
-- `langgraph_chroma_retreiver.ipynb` — exploratory notebook (optional)
 
-Data folder and accepted file types
-- Place all source files you want to ingest under the `./data/` directory.
-- Supported file extensions: `.txt` and `.pdf`.
-- The CLI smoke-test `rag_app.py` will load every supported file in `./data/`, create chunks, build/persist a Chroma index at `./chroma_db`, and then run a test retrieval + chat answer.
+# What changed from the assignment template:
 
-If you need to ingest other formats later (docx, html), I can add those with minimal changes.
+In short:
+Large or exploratory artifacts (original notebooks, a persisted Chroma DB, and the full dependency snapshot) were moved into `removed_for_simplify/` so you see a compact, runnable project. I also added a minimal dependency file (`requirements-min.txt`), a small startup helper (`run_streamlit.sh`), and a CLI smoke-test (`rag_app.py`). Functionally, `chat_with_pdf.py` was updated to accept multiple files (.txt/.pdf), extract text from PDFs, optionally build a small Chroma index, and run a context-grounded chat query.
 
-Notes and gotchas
-- Make sure your API key value is the raw token (sk-...), not prefixed with the literal string `Bearer `.
-- Start Streamlit from the same shell/session that has the env vars exported; processes inherit env vars at launch.
-- If your environment shows an error about a missing embedding model, set `OPENAI_EMBEDDING_MODEL` as shown above. The default fallback is `openai.text-embedding-3-small`.
-- If you hit binary/compiled package import errors (e.g., `numpy.dtype size changed`), run a fresh `pip install --upgrade --force-reinstall numpy` and then reinstall compiled packages listed in `requirements.txt`.
+Specifically:
+Files added to the simplified branch (or modified):
 
-Security
-- Do not commit your API key. Use `.env` (not committed) or export it per-session.
+.env.example — small env-template example added.
+README.md — updated for the simplified/grader view.
+chat_with_pdf.py — edited (UI now supports multi-file uploads + PDF extraction & optional RAG flow).
+langgraph_chroma_retreiver.merged.ipynb — added merged/sanitized notebook.
+rag_app.py — new CLI smoke-test (ingest → chunk → embed → Chroma → retrieve → chat).
+requirements-min.txt — new minimal requirements for graders.
+run_streamlit.sh — small run wrapper that checks env vars and starts Streamlit.
+removed_for_simplify/* — several large/heavy items were moved into this folder (persisted Chroma DB, original notebooks, full requirements.txt, constraints.txt, compiled caches, etc.) so the root repo is small and grade-friendly.
+Files relocated to removed_for_simplify (kept as backup, not deleted):
 
-
-Happy grading!
+requirements.txt (full), constraints.txt, original notebooks (langgraph_chroma_retreiver.ipynb, edited notebook), a persisted chroma_db/, and other heavy items.
 
