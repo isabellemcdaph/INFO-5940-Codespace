@@ -32,13 +32,6 @@ Then install dependencies:
 python3 -m pip install -r requirements-min.txt
 ```
 
-Alternatively you can run the provided helper which creates a virtualenv, upgrades pip/setuptools/wheel, and installs the requirements:
-
-```bash
-./setup_venv.sh
-# then activate:
-source .venv-grader/bin/activate
-```
 
 2) Create a small env file (recommended) or export env vars in the terminal. Example (preferred — copy/paste and replace the token):
 

@@ -33,13 +33,13 @@ I used an AI programming assistant while building this submission to accelerate 
 
 ### Rationale for using the assistant
 - Speed: accelerate repetitive edits (file edits, small scripts, and README updates) so I could focus on design and verification.
-- Safety and reproducibility: automate structured, reversible repo edits (e.g., moving heavy artifacts to `removed_for_simplify/`, creating a simplified branch) so graders see a small, runnable submission.
-- Guidance: produce a clear, minimal README and helper scripts that make the grader experience less error-prone.
+- Safety and reproducibility: automate structured, reversible repo edits (e.g., moving heavy artifacts to `removed_for_simplify/`, creating a simplified branch) so it's small and runnable.
+- Guidance: produce a clear, minimal README and helper scripts that make the experience less error-prone.
 
 ### What the assistant did (actions I approved and reviewed)
 - Inspected the repository and added a Streamlit UI enhancement to accept multiple files (.txt, .pdf) and extract text from PDFs with a pypdf fallback.
 - Implemented a CLI smoke-test (`rag_app.py`) that ingests files from `./data/`, chunks text, creates embeddings, persists a Chroma index, and runs a retrieval+chat test.
-- Added convenience artifacts: `run_streamlit.sh`, `.env.example`, and `requirements-min.txt` (minimal deps for graders).
+- Added convenience artifacts: `run_streamlit.sh`, `.env.example`, and `requirements-min.txt` (minimal deps).
 - Helped diagnose and resolve environment dependency issues (for example, guiding a numpy reinstall cycle); I performed the commands and validated imports.
 - Managed the simplified submission workflow: created a `simplified` git branch, moved large or exploratory files into `removed_for_simplify/`, and produced a ZIP of the simplified workspace for download.
 - Started and managed the Streamlit server in the Codespace for testing (I provided the API key in the session and confirmed the server saw the env vars).
