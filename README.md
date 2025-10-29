@@ -10,6 +10,7 @@ Overview — what this project does
 - CLI smoke-test (`rag_app.py`): run a minimal ingest → chunk → embed → Chroma persist → retrieve → chat flow from the terminal for quick grading.
 - Data-driven: place `.txt` or `.pdf` files into `./data/` for CLI ingestion.
 
+
 Requirements (what the runner must provide):
 - A GitHub Codespace (or local machine) with Python 3.11 and pip installed.
 - An API key for the institution proxy (do NOT commit your key).
@@ -21,7 +22,7 @@ Requirements (what the runner must provide):
 1) Install python deps (run once in the Codespace terminal):
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-min.txt
 ```
 
 2) Create a small env file (recommended) or export env vars in the terminal. Example (preferred — copy/paste and replace the token):
@@ -58,17 +59,51 @@ python3 rag_app.py            # creates ./chroma_db/, runs a small retrieval and
 In short:
 Large or exploratory artifacts (original notebooks, a persisted Chroma DB, and the full dependency snapshot) were moved into `removed_for_simplify/` so you see a compact, runnable project. I also added a minimal dependency file (`requirements-min.txt`), a small startup helper (`run_streamlit.sh`), and a CLI smoke-test (`rag_app.py`). Functionally, `chat_with_pdf.py` was updated to accept multiple files (.txt/.pdf), extract text from PDFs, optionally build a small Chroma index, and run a context-grounded chat query.
 
-Specifically:
+- I added a minimal dependency file `requirements-min.txt` for simplicity's sake. It only includes a minimal set of packages needed to run the Streamlit app and CLI smoke test. If you need the full constraints snapshot for reproducibility, it's in `removed_for_simplify/constraints.txt`.
+
+Here are the packages present in my updated requirements-min.txt but not in original requirements.txt
+
+chromadb>=1.2
+langchain-text-splitters
+langchain-core==0.3.79 (note: original uses package name with an underscore: langchain_core==0.3.79 — see below)
+(I also list pandas with no pinned version in the minimal file; upstream pins pandas==2.)
+
+Here are the packages present in requirements.txt but omitted from requirements-min.txt 
+
+aioboto3==12
+fsspec
+pydantic # 2.12.0
+s3fs
+cfn_flip
+cfn-lint
+ipykernel
+notebook
+openpyxl
+beautifulsoup4
+pyarrow
+litellm # 1.77.7
+protobuf>=4.21.6,<5.0.0
+(and a few others used for heavier dev/notebook workflows)
+
+- `.devcontainer/` was not modified — the original devcontainer configuration is intact and present in the repository. Use the provided devcontainer to reproduce the original development environment if required.
+
+- Other helper files added: `run_streamlit.sh` (checks env and runs the app), `.env.example` (example env vars), and `rag_app.py` (CLI smoke-test).
+
+- I also made specifications for which models (gpt-5 mini, etc) to use.
+
+Overall file changes:
+
 Files added to the simplified branch (or modified):
 
 .env.example — small env-template example added.
-README.md — updated for the simplified/grader view.
+README.md — updated 
 chat_with_pdf.py — edited (UI now supports multi-file uploads + PDF extraction & optional RAG flow).
 langgraph_chroma_retreiver.merged.ipynb — added merged/sanitized notebook.
 rag_app.py — new CLI smoke-test (ingest → chunk → embed → Chroma → retrieve → chat).
-requirements-min.txt — new minimal requirements for graders.
+requirements-min.txt — new minimal requirements
 run_streamlit.sh — small run wrapper that checks env vars and starts Streamlit.
-removed_for_simplify/* — several large/heavy items were moved into this folder (persisted Chroma DB, original notebooks, full requirements.txt, constraints.txt, compiled caches, etc.) so the root repo is small and grade-friendly.
+removed_for_simplify/* — several large/heavy items were moved into this folder (persisted Chroma DB, original notebooks, full requirements.txt, constraints.txt, compiled caches, etc.) so the root repo is small
+
 Files relocated to removed_for_simplify (kept as backup, not deleted):
 
 requirements.txt (full), constraints.txt, original notebooks (langgraph_chroma_retreiver.ipynb, edited notebook), a persisted chroma_db/, and other heavy items.

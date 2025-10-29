@@ -3,13 +3,13 @@ streamlit>=1.36
 openai~=1.14
 chromadb>=1.2
 langchain==0.3.27
-langchain-core==0.3.79
+langchain_core==0.3.79
 langchain-openai==0.3.35
 langchain-community==0.3.31
 langchain-text-splitters
 tiktoken==0.7.0
 
 # Optional but commonly needed
-pandas
+pandas==2
 pypdf>=4
 ```
