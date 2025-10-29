@@ -29,9 +29,21 @@ except Exception:
     PYPDF_AVAILABLE = False
 
 
-st.title("📝 Isabelle McLeod Daphnis's Assignment 1")
-uploaded_files = st.file_uploader("Upload your files (.txt, .md, .pdf)", type=("txt", "md", "pdf"), accept_multiple_files=True)
+# Use a wide page layout so columns render side-by-side by default
+st.set_page_config(layout="wide")
 
+# Put uploads and settings in the left sidebar (guaranteed left placement)
+with st.sidebar:
+    st.subheader("Upload files")
+    uploaded_files = st.file_uploader(
+        "Upload your files (.txt, .md, .pdf)",
+        type=("txt", "md", "pdf"),
+        accept_multiple_files=True,
+    )
+
+# Main area: title and chat
+st.title("📝 Isabelle McLeod Daphnis's Assignment 1")
+st.subheader("Chat")
 question = st.chat_input(
     "Ask something about your uploaded files",
     disabled=not uploaded_files,
@@ -40,6 +52,7 @@ question = st.chat_input(
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Ask something about the uploaded files"}]
 
+# Display the chat history in the main area
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
